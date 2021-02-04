@@ -1,0 +1,46 @@
+
+postgresqlUsername: krista
+postgresqlPassword: passw0rd
+postgresqlDatabase: satellite
+resources:
+    requests: 
+        cpu: 250m
+        memory: 256Mi
+    limits:
+        cpu: 1000m
+        memory: 512Mi
+replication:
+    readReplicas: 0
+service:
+    type: LoadBalancer
+    port: 5432
+    annotations:
+        cloud.google.com/load-balancer-type: Internal
+        networking.gke.io/internal-load-balancer-allow-global-access: "true"
+persistence:
+    enabled: false
+metrics:
+    enabled: true
+
+primary:
+    sidecars:
+        - name: wg-docker
+          image: kristaxox/wg-docker:latest
+          imagePullPolicy: Always
+          env:
+            - name: CONFIG_FILE_PATH
+              value: /etc/wireguard/config/wg0.conf
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["NET_ADMIN"]
+          volumeMounts:
+            - name: wg-relay-config-volume
+              mountPath: /etc/wireguard/config/
+    extraVolumes:
+        - name: wg-relay-config-volume
+          configMap:
+            name: wg-relay-config
+            items:
+            - key: "wg0.conf"
+              path: "wg0.conf"
