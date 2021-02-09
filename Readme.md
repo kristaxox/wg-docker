@@ -20,9 +20,9 @@ container spec:
     - name: CONFIG_FILE_PATH
       value: /etc/wireguard/config/wg0.conf
   securityContext:
-  privileged: true
-  capabilities:
-    add: ["NET_ADMIN"]
+    privileged: true
+    capabilities:
+      add: ["NET_ADMIN"]
   volumeMounts:
     - name: wg-relay-config-volume
       mountPath: /etc/wireguard/config/
@@ -36,7 +36,7 @@ volumes spec:
     name: wg-relay-config
     items:
     - key: "wg0.conf"
-        path: "wg0.conf"
+      path: "wg0.conf"
 ```
 
 ### configmap
