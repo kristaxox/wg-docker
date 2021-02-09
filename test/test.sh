@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 containerID1=""
 containerID2=""
