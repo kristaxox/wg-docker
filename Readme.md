@@ -11,6 +11,7 @@ Well there still exists several OS that do not have the wireguard kernel headers
 ### sidecar
 
 container spec:
+
 ```yaml
 - name: wg-docker
   image: kristaxox/wg-docker:latest
@@ -28,6 +29,7 @@ container spec:
 ```
 
 volumes spec:
+
 ```yaml
 - name: wg-relay-config-volume
   configMap:
@@ -38,6 +40,7 @@ volumes spec:
 ```
 
 ### configmap
+
 ```yaml
 apiVersion: v1
 kind: ConfigMap
