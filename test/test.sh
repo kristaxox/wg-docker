@@ -41,8 +41,7 @@ EOF
 echo -n "starting c1"
 interfaceName1=$(sed "s/[^a-zA-Z0-9]//g" <<< $(openssl rand -base64 3))
 containerID1=$(docker run -d --privileged -p 51899:51899 -v /dev/net/tun:/dev/net/tun -v $(pwd)/test/1.wg0.conf:/etc/wireguard/config/${interfaceName1}.conf -e WG_CONFIG_PATH=/etc/wireguard/config/${interfaceName1}.conf --cap-add NET_ADMIN --cap-add SYS_ADMIN kristaxox/wg-docker)
-docker logs ${containerID1}
-endpoint=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
+endpoint=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${containerID1})
 
 cat > ./test/2.wg0.conf <<EOF2
 [Interface]
@@ -57,9 +56,10 @@ EOF2
 
 echo -n "starting c2"
 interfaceName2=$(sed "s/[^a-zA-Z0-9]//g" <<< $(openssl rand -base64 3))
-containerID2=$(docker run -d --privileged -v /dev/net/tun:/dev/net/tun -v $(pwd)/test/2.wg0.conf:/etc/wireguard/config/${interfaceName2}.conf -e WG_CONFIG_PATH=/etc/wireguard/config/${interfaceName2}.conf --cap-add NET_ADMIN --cap-add SYS_ADMIN SYSkristaxox/wg-docker)
-docker logs ${containerID2}
-docker exec -t ${containerID2} sh -c 'ping -t 30 -c 5'
+containerID2=$(docker run -d --privileged -v /dev/net/tun:/dev/net/tun -v $(pwd)/test/2.wg0.conf:/etc/wireguard/config/${interfaceName2}.conf -e WG_CONFIG_PATH=/etc/wireguard/config/${interfaceName2}.conf --cap-add NET_ADMIN --cap-add SYS_ADMIN kristaxox/wg-docker)
+
+echo "testing connection from c2 to c1"
+docker exec -t ${containerID2} sh -c 'ping -c 5 10.28.0.1'
 if [ "${?}" -eq "1" ]; then
     echo "test failed, cannot ping c1 from c2"
 fi
