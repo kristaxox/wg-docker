@@ -41,7 +41,7 @@ EOF
 echo -n "starting c1"
 interfaceName1=$(sed "s/[^a-zA-Z0-9]//g" <<< $(openssl rand -base64 3))
 containerID1=$(docker run -d --privileged -p 51899:51899 -v /dev/net/tun:/dev/net/tun -v $(pwd)/test/1.wg0.conf:/etc/wireguard/config/${interfaceName1}.conf -e WG_CONFIG_PATH=/etc/wireguard/config/${interfaceName1}.conf --cap-add NET_ADMIN --cap-add SYS_ADMIN kristaxox/wg-docker)
-endpoint=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
+endpoint=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${containerID1})
 
 cat > ./test/2.wg0.conf <<EOF2
 [Interface]
