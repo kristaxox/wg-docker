@@ -2,8 +2,14 @@
 
 Wrapping [userspace wireguard](https://git.zx2c4.com/wireguard-go/) in a docker container.
 
+## Why userspace?
+
+Well there still exists several OS that do not have the wireguard kernel headers, but my main motivation was the lack of support in CO-OS (GKE in my case).
+
 ## Kubernetes Deploy
+
 ### sidecar
+
 container spec:
 ```yaml
 - name: wg-docker
