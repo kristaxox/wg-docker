@@ -7,6 +7,7 @@ containerID2=""
 
 function cleanup()
 {
+    echo -e "executing cleanup func"
     rm ./test/1.*
     rm ./test/2.*
     docker stop ${containerID1} ${containerID2} || true
@@ -14,7 +15,7 @@ function cleanup()
 }
 trap cleanup INT HUP SIGINT EXIT
 
-echo -n "generating configs and launching test containers.."
+echo -e "generating configs and launching test containers.."
 for i in 1 2; do
     docker run --rm -v $(pwd)/test/:/test/ --entrypoint /bin/sh kristaxox/wg-docker -c "wg genkey | tee /test/$i.privatekey | wg pubkey > /test/$i.publickey"
 done
@@ -38,7 +39,7 @@ PublicKey = ${publickey2}
 AllowedIPs = 10.28.0.2/32
 EOF
 
-echo -n "starting c1"
+echo -e "starting c1"
 interfaceName1=$(sed "s/[^a-zA-Z0-9]//g" <<< $(openssl rand -base64 3))
 containerID1=$(docker run -d --privileged -p 51899:51899 -v /dev/net/tun:/dev/net/tun -v $(pwd)/test/1.wg0.conf:/etc/wireguard/config/${interfaceName1}.conf -e WG_CONFIG_PATH=/etc/wireguard/config/${interfaceName1}.conf --cap-add NET_ADMIN --cap-add SYS_ADMIN kristaxox/wg-docker)
 endpoint=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${containerID1})
@@ -54,12 +55,12 @@ Endpoint = ${endpoint}:51899
 AllowedIPs = 10.28.0.1/32
 EOF2
 
-echo -n "starting c2"
+echo -e "starting c2"
 interfaceName2=$(sed "s/[^a-zA-Z0-9]//g" <<< $(openssl rand -base64 3))
 containerID2=$(docker run -d --privileged -v /dev/net/tun:/dev/net/tun -v $(pwd)/test/2.wg0.conf:/etc/wireguard/config/${interfaceName2}.conf -e WG_CONFIG_PATH=/etc/wireguard/config/${interfaceName2}.conf --cap-add NET_ADMIN --cap-add SYS_ADMIN kristaxox/wg-docker)
 
-echo "testing connection from c2 to c1"
+echo -e "testing connection from c2 to c1"
 docker exec -t ${containerID2} sh -c 'ping -c 5 10.28.0.1'
 if [ "${?}" -eq "1" ]; then
-    echo "test failed, cannot ping c1 from c2"
+    echo -e "test failed, cannot ping c1 from c2"
 fi
