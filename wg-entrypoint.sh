@@ -13,4 +13,7 @@ echo "starting wg interface..."
 sysctl -w net.ipv4.ip_forward=1 && sysctl -w net.ipv4.conf.all.forwarding=1
 wg-quick up ${wgConfigPath}
 wg show
-read # block!
+
+# block forever!
+sleep infinity &
+wait
